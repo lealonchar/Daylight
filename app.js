@@ -1,7 +1,33 @@
-const STORAGE_KEYS = {
-  logs: "daylight.logs",
-  profile: "daylight.profile"
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  getFirestore,
+  serverTimestamp,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBLnrouRSwWDTDPsLSr38yj-kZM07_pyEI",
+  authDomain: "daylight-62ae6.firebaseapp.com",
+  projectId: "daylight-62ae6",
+  storageBucket: "daylight-62ae6.firebasestorage.app",
+  messagingSenderId: "239716748150",
+  appId: "1:239716748150:web:4e78cc375e48db11864857"
 };
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
 const facts = [
   {
@@ -80,11 +106,25 @@ const badges = [
   }
 ];
 
-let logs = loadLogs();
-let profile = loadProfile();
+let logs = [];
+let profile = null;
 let currentRange = 7;
+let currentUser = null;
+let isSaving = false;
+let isGuestMode = false;
 
 const els = {
+  authScreen: document.querySelector("#auth-screen"),
+  authForm: document.querySelector("#auth-form"),
+  authEmail: document.querySelector("#auth-email"),
+  authPassword: document.querySelector("#auth-password"),
+  authMessage: document.querySelector("#auth-message"),
+  loginButton: document.querySelector("#login-button"),
+  registerButton: document.querySelector("#register-button"),
+  browseButton: document.querySelector("#browse-button"),
+  logoutButton: document.querySelector("#logout-button"),
+  userChip: document.querySelector("#user-chip"),
+  userEmail: document.querySelector("#user-email"),
   panels: document.querySelectorAll(".panel"),
   tabs: document.querySelectorAll(".tab-button"),
   rangeButtons: document.querySelectorAll(".range-button"),
@@ -110,8 +150,6 @@ const els = {
   tipsList: document.querySelector("#tips-list"),
   hbscTitle: document.querySelector("#hbsc-fact-title"),
   hbscFact: document.querySelector("#hbsc-fact"),
-  demoData: document.querySelector("#demo-data"),
-  resetData: document.querySelector("#reset-data"),
   toast: document.querySelector("#toast"),
   onboarding: document.querySelector("#onboarding"),
   onboardingForm: document.querySelector("#onboarding-form"),
@@ -120,19 +158,55 @@ const els = {
 };
 
 function init() {
+  document.body.classList.add("auth-pending");
   els.date.value = toDateInput(new Date());
   els.screenOutput.value = Number(els.screenTime.value).toFixed(1);
   bindEvents();
   rotateFact();
-
-  if (!profile) {
-    openOnboarding();
-  }
-
   render();
+
+  onAuthStateChanged(auth, async (user) => {
+    currentUser = user;
+
+    if (!user) {
+      if (!isGuestMode) {
+        logs = [];
+        profile = null;
+        updateAuthState("signed-out");
+        render();
+      }
+      return;
+    }
+
+    isGuestMode = false;
+    updateAuthState("pending");
+    els.userEmail.textContent = user.email || "Daylight user";
+    els.userChip.hidden = false;
+    setAuthMessage("Ги вчитувам твоите податоци...", "success");
+
+    try {
+      await loadCloudData(user.uid);
+      updateAuthState("signed-in");
+      setAuthMessage("", "success");
+      render();
+
+      if (!profile) {
+        openOnboarding();
+      }
+    } catch (error) {
+      updateAuthState("signed-out");
+      setAuthMessage(getFirebaseMessage(error), "error");
+      showToast("Не можам да ги вчитам податоците од Firebase.");
+    }
+  });
 }
 
 function bindEvents() {
+  els.authForm.addEventListener("submit", (event) => handleAuth(event, "login"));
+  els.registerButton.addEventListener("click", (event) => handleAuth(event, "register"));
+  els.browseButton.addEventListener("click", startGuestMode);
+  els.logoutButton.addEventListener("click", handleLogout);
+
   els.tabs.forEach((button) => {
     button.addEventListener("click", () => activateTab(button.dataset.tab));
   });
@@ -152,10 +226,145 @@ function bindEvents() {
   });
 
   els.form.addEventListener("submit", handleSave);
-  els.demoData.addEventListener("click", loadDemoData);
-  els.resetData.addEventListener("click", resetData);
   els.onboardingForm.addEventListener("submit", saveProfile);
   window.addEventListener("resize", drawChart);
+}
+
+async function handleAuth(event, mode) {
+  event.preventDefault();
+  const email = els.authEmail.value.trim();
+  const password = els.authPassword.value;
+
+  if (!email || !password) {
+    setAuthMessage("Внеси email и password.", "error");
+    return;
+  }
+
+  setAuthBusy(true);
+  setAuthMessage(mode === "register" ? "Креирам акаунт..." : "Се најавувам...", "success");
+
+  try {
+    if (mode === "register") {
+      await createUserWithEmailAndPassword(auth, email, password);
+    } else {
+      await signInWithEmailAndPassword(auth, email, password);
+    }
+  } catch (error) {
+    setAuthMessage(getFirebaseMessage(error), "error");
+  } finally {
+    setAuthBusy(false);
+  }
+}
+
+async function handleLogout() {
+  if (isGuestMode) {
+    isGuestMode = false;
+    logs = [];
+    profile = null;
+    updateAuthState("signed-out");
+    render();
+    return;
+  }
+
+  try {
+    isGuestMode = false;
+    await signOut(auth);
+    showToast("Одјавено.");
+  } catch (error) {
+    showToast(getFirebaseMessage(error));
+  }
+}
+
+function startGuestMode() {
+  isGuestMode = true;
+  currentUser = null;
+  profile = {
+    age: "13",
+    goals: ["sleep", "screen"],
+    goal: "sleep",
+    bedtime: "22:30"
+  };
+  logs = createDemoLogs();
+  els.userEmail.textContent = "Разгледување без акаунт";
+  els.userChip.hidden = false;
+  els.logoutButton.textContent = "Најави се";
+  updateAuthState("guest");
+  render();
+  showToast("Ова е пример за разгледување. За зачувување, најави се.");
+}
+
+function updateAuthState(state) {
+  document.body.classList.toggle("auth-pending", state === "pending");
+  document.body.classList.toggle("auth-signed-out", state === "signed-out");
+  document.body.classList.toggle("auth-signed-in", state === "signed-in");
+  document.body.classList.toggle("auth-guest", state === "guest");
+
+  if (state === "signed-in") {
+    els.logoutButton.textContent = "Одјави се";
+  }
+
+  if (state !== "signed-in" && state !== "guest") {
+    els.userChip.hidden = true;
+  }
+}
+
+function setAuthBusy(isBusy) {
+  els.loginButton.disabled = isBusy;
+  els.registerButton.disabled = isBusy;
+}
+
+function setAuthMessage(message, type = "") {
+  els.authMessage.textContent = message || "За трајно зачувување користи email и лозинка. Без акаунт можеш само да ја разгледаш апликацијата.";
+  els.authMessage.classList.toggle("error", type === "error");
+  els.authMessage.classList.toggle("success", type === "success");
+}
+
+function getFirebaseMessage(error) {
+  const code = error?.code || "";
+
+  if (code.includes("auth/email-already-in-use")) return "Овој email веќе има акаунт.";
+  if (code.includes("auth/invalid-email")) return "Email адресата не е валидна.";
+  if (code.includes("auth/weak-password")) return "Password мора да има најмалку 6 карактери.";
+  if (code.includes("auth/invalid-credential")) return "Погрешен email или password.";
+  if (code.includes("auth/operation-not-allowed")) return "Вклучи Email/Password во Firebase Authentication.";
+  if (code.includes("permission-denied")) return "Firestore rules не дозволуваат пристап. Провери ги правилата.";
+  if (code.includes("unavailable")) return "Firebase моментално не е достапен. Пробај повторно.";
+
+  return error?.message || "Се случи грешка.";
+}
+
+async function loadCloudData(userId) {
+  const [profileSnap, logsSnap] = await Promise.all([
+    getDoc(profileRef(userId)),
+    getDocs(logsRef(userId))
+  ]);
+
+  profile = profileSnap.exists() ? profileSnap.data() : null;
+  logs = sortLogs(logsSnap.docs.map((logDoc) => normalizeLog(logDoc.id, logDoc.data())));
+}
+
+function profileRef(userId = currentUser?.uid) {
+  return doc(db, "users", userId, "profile", "main");
+}
+
+function logsRef(userId = currentUser?.uid) {
+  return collection(db, "users", userId, "logs");
+}
+
+function logRef(date, userId = currentUser?.uid) {
+  return doc(db, "users", userId, "logs", date);
+}
+
+function normalizeLog(id, data) {
+  return {
+    date: data.date || id,
+    bedTime: data.bedTime || "22:45",
+    wakeTime: data.wakeTime || "07:00",
+    sleepHours: Number(data.sleepHours || 0),
+    screenTime: Number(data.screenTime || 0),
+    mood: Number(data.mood || 3),
+    savedAt: data.savedAt || ""
+  };
 }
 
 function activateTab(tabId) {
@@ -172,8 +381,18 @@ function activateTab(tabId) {
   }
 }
 
-function handleSave(event) {
+async function handleSave(event) {
   event.preventDefault();
+
+  if (isGuestMode) {
+    showToast("Во режим за разгледување не се зачувува. Најави се за вистински дневник.");
+    return;
+  }
+
+  if (!currentUser || isSaving) {
+    showToast("Најави се пред да зачуваш.");
+    return;
+  }
 
   const mood = Number(new FormData(els.form).get("mood"));
   const sleepHours = calculateSleepHours(els.bedTime.value, els.wakeTime.value);
@@ -187,37 +406,86 @@ function handleSave(event) {
     savedAt: new Date().toISOString()
   };
 
-  logs = upsertLog(logs, entry);
-  saveLogs();
-  render();
-  showToast(`Зачувано: ${formatHours(sleepHours)} сон, ${entry.screenTime.toFixed(1)}ч екран.`);
+  isSaving = true;
+  els.form.querySelector("button[type='submit']").disabled = true;
+
+  try {
+    await setDoc(logRef(entry.date), {
+      ...entry,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    logs = upsertLog(logs, entry);
+    render();
+    showToast(`Зачувано online: ${formatHours(sleepHours)} сон, ${entry.screenTime.toFixed(1)}ч екран.`);
+  } catch (error) {
+    showToast(getFirebaseMessage(error));
+  } finally {
+    isSaving = false;
+    els.form.querySelector("button[type='submit']").disabled = false;
+  }
 }
 
-function saveProfile(event) {
+async function saveProfile(event) {
   event.preventDefault();
-  const selectedGoal = new FormData(els.onboardingForm).get("goal");
+
+  const selectedGoals = new FormData(els.onboardingForm).getAll("goals");
+
+  if (!selectedGoals.length) {
+    showToast("Избери барем една цел.");
+    return;
+  }
+
+  if (isGuestMode) {
+    profile = {
+      age: els.profileAge.value,
+      goals: selectedGoals,
+      goal: selectedGoals[0],
+      bedtime: els.profileBedtime.value,
+      updatedAt: new Date().toISOString()
+    };
+    els.onboarding.close();
+    renderTips();
+    showToast("Целите се применети само за разгледување.");
+    return;
+  }
+
+  if (!currentUser) {
+    showToast("Најави се пред да продолжиш.");
+    return;
+  }
 
   profile = {
     age: els.profileAge.value,
-    goal: selectedGoal,
-    bedtime: els.profileBedtime.value
+    goals: selectedGoals,
+    goal: selectedGoals[0],
+    bedtime: els.profileBedtime.value,
+    updatedAt: new Date().toISOString()
   };
 
-  localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(profile));
-  els.onboarding.close();
-  showToast("Daylight е подготвен.");
-  renderTips();
+  try {
+    await setDoc(profileRef(), {
+      ...profile,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+
+    els.onboarding.close();
+    showToast("Daylight профилот е зачуван online.");
+    renderTips();
+  } catch (error) {
+    showToast(getFirebaseMessage(error));
+  }
 }
 
 function openOnboarding() {
-  if (typeof els.onboarding.showModal === "function") {
+  if (typeof els.onboarding.showModal === "function" && !els.onboarding.open) {
     els.onboarding.showModal();
   }
 }
 
 function render() {
   const state = getState();
-  renderSummary(state);
+  renderSummary();
   renderMetrics(state);
   drawChart();
   renderCorrelation();
@@ -225,7 +493,7 @@ function render() {
   renderTips();
 }
 
-function renderSummary(state) {
+function renderSummary() {
   const latest = getLatestLog();
 
   if (!latest) {
@@ -443,7 +711,7 @@ function renderBadges(state) {
 
 function renderTips() {
   const latest = getLatestLog();
-  const goal = profile?.goal || "sleep";
+  const goals = getProfileGoals();
   const tips = [];
 
   if (!latest) {
@@ -486,19 +754,23 @@ function renderTips() {
     }
   }
 
-  if (goal === "screen") {
+  if (goals.includes("screen")) {
     tips.push({
       icon: "↓",
       title: "Намали без драма",
       text: "Одбери една апликација и скрати ја за 15 минути денес, наместо да менуваш се одеднаш."
     });
-  } else if (goal === "mood") {
+  }
+
+  if (goals.includes("mood")) {
     tips.push({
       icon: "✦",
       title: "Планирај едно добро нешто",
       text: "Стави мал настан што го сакаш пред екранот: музика, прошетка, цртање или разговор."
     });
-  } else {
+  }
+
+  if (goals.includes("sleep")) {
     tips.push({
       icon: "▥",
       title: "Ист час, полесно будење",
@@ -515,6 +787,18 @@ function renderTips() {
       </div>
     </article>
   `).join("");
+}
+
+function getProfileGoals() {
+  if (Array.isArray(profile?.goals) && profile.goals.length) {
+    return profile.goals;
+  }
+
+  if (profile?.goal) {
+    return [profile.goal];
+  }
+
+  return ["sleep"];
 }
 
 function rotateFact() {
@@ -690,33 +974,6 @@ function toDateInput(date) {
   return local.toISOString().slice(0, 10);
 }
 
-function loadLogs() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.logs)) || [];
-  } catch {
-    return [];
-  }
-}
-
-function saveLogs() {
-  localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(logs));
-}
-
-function loadProfile() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEYS.profile));
-  } catch {
-    return null;
-  }
-}
-
-function loadDemoData() {
-  logs = createDemoLogs();
-  saveLogs();
-  render();
-  showToast("Демо податоците се вчитани.");
-}
-
 function createDemoLogs() {
   const today = new Date();
   const pattern = [
@@ -752,20 +1009,13 @@ function createDemoLogs() {
   });
 }
 
-function resetData() {
-  logs = [];
-  saveLogs();
-  render();
-  showToast("Дневникот е исчистен.");
-}
-
 function showToast(message) {
   els.toast.textContent = message;
   els.toast.classList.add("visible");
   clearTimeout(showToast.timer);
   showToast.timer = setTimeout(() => {
     els.toast.classList.remove("visible");
-  }, 2400);
+  }, 2800);
 }
 
 init();

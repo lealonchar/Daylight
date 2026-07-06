@@ -7,6 +7,34 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
+    <section class="auth-screen" id="auth-screen" aria-labelledby="auth-title">
+      <form class="auth-card" id="auth-form">
+        <span class="brand-mark large" aria-hidden="true"></span>
+        <p class="eyebrow">Daylight профил</p>
+        <h1 id="auth-title">Најави се за да го зачуваш дневникот</h1>
+        <p>Со акаунт, твоите записи се чуваат online и можеш да ги отвориш од телефон, лаптоп или друг browser.</p>
+
+        <label>
+          <span>Email</span>
+          <input id="auth-email" type="email" autocomplete="email" required>
+        </label>
+
+        <label>
+          <span>Password</span>
+          <input id="auth-password" type="password" autocomplete="current-password" minlength="6" required>
+        </label>
+
+        <div class="form-actions">
+          <button class="primary-button" id="login-button" type="submit">Најави се</button>
+          <button class="ghost-button" id="register-button" type="button">Регистрирај се</button>
+        </div>
+
+        <button class="text-button" id="browse-button" type="button">Разгледај без акаунт</button>
+
+        <p class="auth-note" id="auth-message">За трајно зачувување користи email и лозинка. Без акаунт можеш само да ја разгледаш апликацијата.</p>
+      </form>
+    </section>
+
     <div class="app-shell">
       <header class="topbar">
         <a class="brand" href="#home" aria-label="Daylight почетна">
@@ -16,6 +44,11 @@
             <small>сон и екрани</small>
           </span>
         </a>
+
+        <div class="user-chip" id="user-chip" hidden>
+          <span id="user-email"></span>
+          <button class="ghost-button compact" id="logout-button" type="button">Одјави се</button>
+        </div>
 
         <nav class="tab-nav" aria-label="Главна навигација">
           <button class="tab-button active" type="button" data-tab="home" aria-label="Дневник" title="Дневник">
@@ -93,7 +126,6 @@
 
               <div class="form-actions">
                 <button class="primary-button" type="submit">Зачувај ден</button>
-                <button class="ghost-button" id="demo-data" type="button">Демо податоци</button>
               </div>
             </form>
           </div>
@@ -115,7 +147,7 @@
               <small>последни 7 дена</small>
             </article>
             <article>
-              <span>Просек екран</span>
+              <span>Просек screen time</span>
               <strong id="avg-screen">0ч</strong>
               <small>последни 7 дена</small>
             </article>
@@ -145,14 +177,14 @@
 
           <div class="insight-grid">
             <article class="insight-card">
-              <p class="eyebrow">твој шаблон</p>
+              <p class="eyebrow">твој образец</p>
               <h3 id="correlation-title">Нема доволно податоци</h3>
-              <p id="correlation-copy">Додај неколку дневни внесови за Daylight да спореди сон, екрани и расположение.</p>
+              <p id="correlation-copy">Додај неколку дневни записи за Daylight да спореди сон, screen time и расположение.</p>
             </article>
             <article class="insight-card">
               <p class="eyebrow">денес</p>
               <h3 id="today-score">0/100</h3>
-              <p id="today-score-copy">Скорот се гради од сон, screen time и расположение.</p>
+              <p id="today-score-copy">Резултатот се пресметува според сон, screen time и расположение.</p>
             </article>
           </div>
         </section>
@@ -160,10 +192,9 @@
         <section class="panel" id="badges" aria-labelledby="badges-title">
           <div class="section-head">
             <div>
-              <p class="eyebrow">игровен ритам</p>
+              <p class="eyebrow">мотивација</p>
               <h2 id="badges-title">Достигнувања</h2>
             </div>
-            <button class="ghost-button" id="reset-data" type="button">Исчисти</button>
           </div>
 
           <div class="progress-card">
@@ -221,11 +252,11 @@
         </label>
 
         <fieldset>
-          <legend>Главна цел</legend>
+          <legend>Цели</legend>
           <div class="goal-options">
-            <label><input type="radio" name="goal" value="sleep" checked><span>Подобар сон</span></label>
-            <label><input type="radio" name="goal" value="screen"><span>Помалку екран</span></label>
-            <label><input type="radio" name="goal" value="mood"><span>Подобро расположение</span></label>
+            <label><input type="checkbox" name="goals" value="sleep" checked><span>Подобар сон</span></label>
+            <label><input type="checkbox" name="goals" value="screen"><span>Помалку screen time</span></label>
+            <label><input type="checkbox" name="goals" value="mood"><span>Подобро расположение</span></label>
           </div>
         </fieldset>
 
@@ -238,6 +269,6 @@
       </form>
     </dialog>
 
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>

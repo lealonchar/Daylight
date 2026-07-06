@@ -46,6 +46,74 @@ a {
   text-decoration: none;
 }
 
+body.auth-pending .app-shell {
+  filter: blur(8px);
+  pointer-events: none;
+  user-select: none;
+}
+
+body.auth-signed-in .auth-screen,
+body.auth-guest .auth-screen {
+  display: none;
+}
+
+.auth-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(247, 251, 248, 0.76);
+  backdrop-filter: blur(14px);
+}
+
+.auth-card {
+  width: min(460px, 100%);
+  display: grid;
+  gap: 16px;
+  padding: 26px;
+  border: 1px solid rgba(216, 231, 226, 0.9);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.auth-card h1 {
+  margin-bottom: 0;
+  font-size: 2.1rem;
+  line-height: 1;
+}
+
+.auth-card p {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.auth-note {
+  min-height: 22px;
+  font-size: 0.9rem;
+}
+
+.auth-note.error {
+  color: #b84237;
+}
+
+.auth-note.success {
+  color: var(--teal);
+}
+
+.text-button {
+  min-height: 34px;
+  border: 0;
+  background: transparent;
+  color: var(--teal);
+  font-weight: 900;
+  text-align: center;
+}
+
 .app-shell {
   width: min(1180px, calc(100% - 28px));
   margin: 0 auto;
@@ -78,6 +146,28 @@ a {
   font-size: 0.78rem;
   font-weight: 800;
   text-transform: uppercase;
+}
+
+.user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 320px;
+  padding: 6px;
+  border: 1px solid rgba(216, 231, 226, 0.85);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 12px 38px rgba(37, 64, 69, 0.08);
+}
+
+.user-chip span {
+  overflow: hidden;
+  padding-left: 10px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .brand-mark {
@@ -428,6 +518,12 @@ input[type="range"] {
   font-weight: 900;
 }
 
+.ghost-button.compact {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+}
+
 .primary-button {
   flex: 1;
   background: var(--ink);
@@ -741,6 +837,10 @@ dialog::backdrop {
     flex-direction: column;
   }
 
+  .user-chip {
+    max-width: 100%;
+  }
+
   .tab-nav {
     width: 100%;
     justify-content: space-between;
@@ -798,8 +898,13 @@ dialog::backdrop {
   .insight-card,
   .progress-card,
   .hbsc-card,
-  .onboarding-card {
+  .onboarding-card,
+  .auth-card {
     padding: 16px;
+  }
+
+  .auth-card h1 {
+    font-size: 1.7rem;
   }
 
   h1 {
