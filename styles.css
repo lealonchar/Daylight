@@ -63,33 +63,63 @@ body.auth-guest .auth-screen {
   z-index: 20;
   display: grid;
   place-items: center;
+  min-height: 100vh;
   padding: 18px;
   background: rgba(247, 251, 248, 0.76);
   backdrop-filter: blur(14px);
 }
 
 .auth-card {
-  width: min(460px, 100%);
+  width: min(440px, 100%);
   display: grid;
-  gap: 16px;
-  padding: 26px;
+  justify-items: stretch;
+  gap: 15px;
+  padding: 32px;
   border: 1px solid rgba(216, 231, 226, 0.9);
   border-radius: var(--radius);
   background: rgba(255, 255, 255, 0.94);
   box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.auth-card .brand-mark {
+  justify-self: center;
+}
+
+.auth-card .eyebrow,
+.auth-card h1,
+.auth-card > p,
+.auth-card .text-button {
+  justify-self: center;
 }
 
 .auth-card h1 {
   margin-bottom: 0;
-  font-size: 2.1rem;
-  line-height: 1;
+  font-size: 2rem;
+  line-height: 1.05;
 }
 
 .auth-card p {
+  max-width: 34rem;
   margin-bottom: 0;
   color: var(--muted);
   font-weight: 700;
   line-height: 1.45;
+}
+
+.auth-card label {
+  text-align: left;
+}
+
+.auth-card .form-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.auth-card .primary-button,
+.auth-card .ghost-button {
+  width: 100%;
 }
 
 .auth-note {
@@ -108,6 +138,7 @@ body.auth-guest .auth-screen {
 .text-button {
   min-height: 34px;
   border: 0;
+  padding: 0 8px;
   background: transparent;
   color: var(--teal);
   font-weight: 900;
@@ -404,6 +435,8 @@ legend {
 }
 
 input[type="date"],
+input[type="email"],
+input[type="password"],
 input[type="time"],
 select {
   min-height: 46px;
@@ -905,6 +938,10 @@ dialog::backdrop {
 
   .auth-card h1 {
     font-size: 1.7rem;
+  }
+
+  .auth-card .form-actions {
+    grid-template-columns: 1fr;
   }
 
   h1 {

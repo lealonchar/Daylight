@@ -11,16 +11,16 @@
       <form class="auth-card" id="auth-form">
         <span class="brand-mark large" aria-hidden="true"></span>
         <p class="eyebrow">Daylight профил</p>
-        <h1 id="auth-title">Најави се за да го зачуваш дневникот</h1>
-        <p>Со акаунт, твоите записи се чуваат online и можеш да ги отвориш од телефон, лаптоп или друг browser.</p>
+        <h1 id="auth-title">Најави се и зачувај го дневникот</h1>
+        <p>Со профил, твоите записи се чуваат онлајн и можеш да ги отвориш од телефон, лаптоп или друг прелистувач.</p>
 
         <label>
-          <span>Email</span>
+          <span>Е-пошта</span>
           <input id="auth-email" type="email" autocomplete="email" required>
         </label>
 
         <label>
-          <span>Password</span>
+          <span>Лозинка</span>
           <input id="auth-password" type="password" autocomplete="current-password" minlength="6" required>
         </label>
 
@@ -29,9 +29,9 @@
           <button class="ghost-button" id="register-button" type="button">Регистрирај се</button>
         </div>
 
-        <button class="text-button" id="browse-button" type="button">Разгледај без акаунт</button>
+        <button class="text-button" id="browse-button" type="button">Разгледај без профил</button>
 
-        <p class="auth-note" id="auth-message">За трајно зачувување користи email и лозинка. Без акаунт можеш само да ја разгледаш апликацијата.</p>
+        <p class="auth-note" id="auth-message">За трајно зачувување користи е-пошта и лозинка. Без профил можеш само да ја разгледаш апликацијата.</p>
       </form>
     </section>
 
@@ -41,7 +41,7 @@
           <span class="brand-mark" aria-hidden="true"></span>
           <span>
             <strong>Daylight</strong>
-            <small>сон и екрани</small>
+            <small>сон и време пред екран</small>
           </span>
         </a>
 
@@ -61,7 +61,7 @@
           </button>
           <button class="tab-button" type="button" data-tab="badges" aria-label="Достигнувања" title="Достигнувања">
             <span aria-hidden="true">✦</span>
-            <span>Badges</span>
+            <span>Значки</span>
           </button>
           <button class="tab-button" type="button" data-tab="tips" aria-label="Совети" title="Совети">
             <span aria-hidden="true">☼</span>
@@ -83,7 +83,7 @@
               <div class="hero-copy">
                 <p class="eyebrow">денешен баланс</p>
                 <h1 id="home-title">Колку светлина имаш за утре?</h1>
-                <p id="daily-summary">Внеси го денешниот сон, екран и расположение.</p>
+                <p id="daily-summary">Внеси часови сон, време пред екран и расположение.</p>
               </div>
             </article>
 
@@ -91,24 +91,24 @@
               <div class="form-head">
                 <div>
                   <p class="eyebrow">10 секунди</p>
-                  <h2>Дневен внес</h2>
+                  <h2>Дневен запис</h2>
                 </div>
                 <input id="entry-date" name="date" type="date" required aria-label="Датум">
               </div>
 
               <div class="time-row">
                 <label>
-                  <span>Легнав</span>
+                  <span>Легнување</span>
                   <input id="bed-time" name="bedTime" type="time" value="22:45" required>
                 </label>
                 <label>
-                  <span>Станав</span>
+                  <span>Будење</span>
                   <input id="wake-time" name="wakeTime" type="time" value="07:00" required>
                 </label>
               </div>
 
               <label class="range-field">
-                <span>Screen time</span>
+                <span>Време пред екран</span>
                 <span class="range-value"><output id="screen-output">4.0</output>ч</span>
                 <input id="screen-time" name="screenTime" type="range" min="0" max="12" step="0.5" value="4">
               </label>
@@ -132,14 +132,14 @@
 
           <section class="metric-strip" aria-label="Краток преглед">
             <article>
-              <span>Streak</span>
+              <span>Низа</span>
               <strong id="streak-count">0</strong>
               <small>здрави денови</small>
             </article>
             <article>
               <span>Поени</span>
               <strong id="points-count">0</strong>
-              <small>Daylight XP</small>
+              <small>Daylight поени</small>
             </article>
             <article>
               <span>Просек сон</span>
@@ -147,7 +147,7 @@
               <small>последни 7 дена</small>
             </article>
             <article>
-              <span>Просек screen time</span>
+              <span>Просек време пред екран</span>
               <strong id="avg-screen">0ч</strong>
               <small>последни 7 дена</small>
             </article>
@@ -158,7 +158,7 @@
           <div class="section-head">
             <div>
               <p class="eyebrow">трендови</p>
-              <h2 id="stats-title">Сон, екран и расположение</h2>
+              <h2 id="stats-title">Сон, време пред екран и расположение</h2>
             </div>
             <div class="segmented" role="group" aria-label="Опсег">
               <button class="range-button active" type="button" data-range="7">7 дена</button>
@@ -167,10 +167,10 @@
           </div>
 
           <div class="chart-wrap">
-            <canvas id="trend-chart" width="1100" height="430" aria-label="Графикон со сон и screen time" role="img"></canvas>
+            <canvas id="trend-chart" width="1100" height="430" aria-label="Графикон со сон и време пред екран" role="img"></canvas>
             <div class="legend" aria-hidden="true">
               <span><i class="sleep-key"></i> сон</span>
-              <span><i class="screen-key"></i> screen time</span>
+              <span><i class="screen-key"></i> време пред екран</span>
               <span><i class="mood-key"></i> расположение</span>
             </div>
           </div>
@@ -179,12 +179,12 @@
             <article class="insight-card">
               <p class="eyebrow">твој образец</p>
               <h3 id="correlation-title">Нема доволно податоци</h3>
-              <p id="correlation-copy">Додај неколку дневни записи за Daylight да спореди сон, screen time и расположение.</p>
+              <p id="correlation-copy">Додај неколку дневни записи за Daylight да спореди сон, време пред екран и расположение.</p>
             </article>
             <article class="insight-card">
               <p class="eyebrow">денес</p>
               <h3 id="today-score">0/100</h3>
-              <p id="today-score-copy">Резултатот се пресметува според сон, screen time и расположение.</p>
+              <p id="today-score-copy">Резултатот се пресметува според сон, време пред екран и расположение.</p>
             </article>
           </div>
         </section>
@@ -213,7 +213,7 @@
         <section class="panel" id="tips" aria-labelledby="tips-title">
           <div class="section-head">
             <div>
-              <p class="eyebrow">микро совети</p>
+              <p class="eyebrow">кратки совети</p>
               <h2 id="tips-title">Следен мал чекор</h2>
             </div>
           </div>
@@ -222,7 +222,7 @@
             <div class="tips-list" id="tips-list"></div>
             <aside class="hbsc-card">
               <p class="eyebrow">HBSC факт</p>
-              <h3 id="hbsc-fact-title">Teens, screens and mental health</h3>
+              <h3 id="hbsc-fact-title">Тинејџери и дигитална благосостојба</h3>
               <p id="hbsc-fact">WHO/HBSC во 2022 опфатиле речиси 280.000 млади на 11, 13 и 15 години од 44 земји и региони. Извештајот бележи раст на проблематична употреба на социјални медиуми од 7% во 2018 на 11% во 2022.</p>
               <a href="https://www.who.int/europe/news/item/25-09-2024-teens--screens-and-mental-health" target="_blank" rel="noreferrer">WHO/HBSC извор</a>
             </aside>
@@ -255,7 +255,7 @@
           <legend>Цели</legend>
           <div class="goal-options">
             <label><input type="checkbox" name="goals" value="sleep" checked><span>Подобар сон</span></label>
-            <label><input type="checkbox" name="goals" value="screen"><span>Помалку screen time</span></label>
+            <label><input type="checkbox" name="goals" value="screen"><span>Помалку време пред екран</span></label>
             <label><input type="checkbox" name="goals" value="mood"><span>Подобро расположение</span></label>
           </div>
         </fieldset>

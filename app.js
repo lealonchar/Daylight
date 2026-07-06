@@ -31,7 +31,7 @@ const db = getFirestore(app);
 
 const facts = [
   {
-    title: "Teens, screens and mental health",
+    title: "Тинејџери и дигитална благосостојба",
     text: "WHO/HBSC во 2022 опфатиле речиси 280.000 млади на 11, 13 и 15 години од 44 земји и региони. Проблематичната употреба на социјални медиуми пораснала од 7% во 2018 на 11% во 2022.",
     url: "https://www.who.int/europe/news/item/25-09-2024-teens--screens-and-mental-health"
   },
@@ -52,56 +52,56 @@ const badges = [
     id: "first-log",
     icon: "◐",
     title: "Прва светлина",
-    description: "Направен е првиот дневен внес.",
+    description: "Направен е првиот дневен запис.",
     earned: (state) => state.logs.length >= 1
   },
   {
     id: "seven-logs",
     icon: "▦",
     title: "7 дена следење",
-    description: "Собрани се најмалку седум дневни внесови.",
+    description: "Собрани се најмалку седум дневни записи.",
     earned: (state) => state.logs.length >= 7
   },
   {
     id: "sleep-seven",
     icon: "☾",
     title: "7 дена добар сон",
-    description: "Постигнат е streak со здрав сон од 7 до 9 часа.",
+    description: "Одржана е низа со здрав сон од 7 до 9 часа.",
     earned: (state) => state.longestSleepStreak >= 7
   },
   {
     id: "screen-down",
     icon: "↓",
-    title: "Екран во пад",
-    description: "Screen time е намален 3 внесови по ред.",
+    title: "Помалку време пред екран",
+    description: "Времето пред екран е намалено во три последователни записи.",
     earned: (state) => hasScreenDrop(state.logs)
   },
   {
     id: "balanced",
     icon: "✦",
     title: "Баланс",
-    description: "Еден ден со 7-9ч сон и 4ч или помалку screen time.",
+    description: "Еден ден со 7-9 часа сон и 4 часа или помалку време пред екран.",
     earned: (state) => state.logs.some((log) => isHealthySleep(log.sleepHours) && log.screenTime <= 4)
   },
   {
     id: "bright-mood",
     icon: "☼",
     title: "Добро утро",
-    description: "Три внесови со расположение 4 или 5.",
+    description: "Три записи со расположение 4 или 5.",
     earned: (state) => state.logs.filter((log) => log.mood >= 4).length >= 3
   },
   {
     id: "low-screen",
     icon: "⌁",
-    title: "Мирен екран",
-    description: "Три дена со screen time до 3 часа.",
+    title: "Мирен дигитален ритам",
+    description: "Три дена со најмногу 3 часа време пред екран.",
     earned: (state) => state.logs.filter((log) => log.screenTime <= 3).length >= 3
   },
   {
     id: "thirty",
     icon: "◆",
     title: "30 дена ритам",
-    description: "Собрани се 30 дневни внесови.",
+    description: "Собрани се 30 дневни записи.",
     earned: (state) => state.logs.length >= 30
   }
 ];
@@ -180,7 +180,7 @@ function init() {
 
     isGuestMode = false;
     updateAuthState("pending");
-    els.userEmail.textContent = user.email || "Daylight user";
+    els.userEmail.textContent = user.email || "Daylight профил";
     els.userChip.hidden = false;
     setAuthMessage("Ги вчитувам твоите податоци...", "success");
 
@@ -196,7 +196,7 @@ function init() {
     } catch (error) {
       updateAuthState("signed-out");
       setAuthMessage(getFirebaseMessage(error), "error");
-      showToast("Не можам да ги вчитам податоците од Firebase.");
+      showToast("Не може да се вчитаат податоците од Firebase.");
     }
   });
 }
@@ -236,12 +236,12 @@ async function handleAuth(event, mode) {
   const password = els.authPassword.value;
 
   if (!email || !password) {
-    setAuthMessage("Внеси email и password.", "error");
+    setAuthMessage("Внеси е-пошта и лозинка.", "error");
     return;
   }
 
   setAuthBusy(true);
-  setAuthMessage(mode === "register" ? "Креирам акаунт..." : "Се најавувам...", "success");
+  setAuthMessage(mode === "register" ? "Го креирам профилот..." : "Се најавувам...", "success");
 
   try {
     if (mode === "register") {
@@ -285,7 +285,7 @@ function startGuestMode() {
     bedtime: "22:30"
   };
   logs = createDemoLogs();
-  els.userEmail.textContent = "Разгледување без акаунт";
+  els.userEmail.textContent = "Разгледување без профил";
   els.userChip.hidden = false;
   els.logoutButton.textContent = "Најави се";
   updateAuthState("guest");
@@ -314,7 +314,7 @@ function setAuthBusy(isBusy) {
 }
 
 function setAuthMessage(message, type = "") {
-  els.authMessage.textContent = message || "За трајно зачувување користи email и лозинка. Без акаунт можеш само да ја разгледаш апликацијата.";
+  els.authMessage.textContent = message || "За трајно зачувување користи е-пошта и лозинка. Без профил можеш само да ја разгледаш апликацијата.";
   els.authMessage.classList.toggle("error", type === "error");
   els.authMessage.classList.toggle("success", type === "success");
 }
@@ -322,11 +322,11 @@ function setAuthMessage(message, type = "") {
 function getFirebaseMessage(error) {
   const code = error?.code || "";
 
-  if (code.includes("auth/email-already-in-use")) return "Овој email веќе има акаунт.";
-  if (code.includes("auth/invalid-email")) return "Email адресата не е валидна.";
-  if (code.includes("auth/weak-password")) return "Password мора да има најмалку 6 карактери.";
-  if (code.includes("auth/invalid-credential")) return "Погрешен email или password.";
-  if (code.includes("auth/operation-not-allowed")) return "Вклучи Email/Password во Firebase Authentication.";
+  if (code.includes("auth/email-already-in-use")) return "Оваа е-пошта веќе има профил.";
+  if (code.includes("auth/invalid-email")) return "Адресата за е-пошта не е валидна.";
+  if (code.includes("auth/weak-password")) return "Лозинката мора да има најмалку 6 карактери.";
+  if (code.includes("auth/invalid-credential")) return "Погрешна е-пошта или лозинка.";
+  if (code.includes("auth/operation-not-allowed")) return "Во Firebase Authentication вклучи најава со е-пошта и лозинка.";
   if (code.includes("permission-denied")) return "Firestore rules не дозволуваат пристап. Провери ги правилата.";
   if (code.includes("unavailable")) return "Firebase моментално не е достапен. Пробај повторно.";
 
@@ -385,7 +385,7 @@ async function handleSave(event) {
   event.preventDefault();
 
   if (isGuestMode) {
-    showToast("Во режим за разгледување не се зачувува. Најави се за вистински дневник.");
+    showToast("Во режим за разгледување не се зачувува. Најави се за да зачувуваш записи.");
     return;
   }
 
@@ -417,7 +417,7 @@ async function handleSave(event) {
 
     logs = upsertLog(logs, entry);
     render();
-    showToast(`Зачувано online: ${formatHours(sleepHours)} сон, ${entry.screenTime.toFixed(1)}ч екран.`);
+    showToast(`Зачувано онлајн: ${formatHours(sleepHours)} сон, ${entry.screenTime.toFixed(1)}ч пред екран.`);
   } catch (error) {
     showToast(getFirebaseMessage(error));
   } finally {
@@ -470,7 +470,7 @@ async function saveProfile(event) {
     }, { merge: true });
 
     els.onboarding.close();
-    showToast("Daylight профилот е зачуван online.");
+    showToast("Daylight профилот е зачуван онлајн.");
     renderTips();
   } catch (error) {
     showToast(getFirebaseMessage(error));
@@ -497,12 +497,12 @@ function renderSummary() {
   const latest = getLatestLog();
 
   if (!latest) {
-    els.dailySummary.textContent = "Внеси го денешниот сон, екран и расположение.";
+    els.dailySummary.textContent = "Внеси часови сон, време пред екран и расположение.";
     return;
   }
 
-  const sleepLabel = isHealthySleep(latest.sleepHours) ? "здрав сон" : "сон за подобрување";
-  const screenLabel = latest.screenTime <= 4 ? "умерен екран" : "повисок screen time";
+  const sleepLabel = isHealthySleep(latest.sleepHours) ? "здрав сон" : "сон што може да се подобри";
+  const screenLabel = latest.screenTime <= 4 ? "умерено време пред екран" : "подолго време пред екран";
   els.dailySummary.textContent = `${formatDate(latest.date)}: ${formatHours(latest.sleepHours)} ${sleepLabel}, ${latest.screenTime.toFixed(1)}ч ${screenLabel}.`;
 }
 
@@ -519,7 +519,7 @@ function renderMetrics(state) {
   els.todayScore.textContent = `${score}/100`;
   els.todayScoreCopy.textContent = latest
     ? getScoreCopy(score)
-    : "Скорот се гради од сон, screen time и расположение.";
+    : "Резултатот се пресметува според сон, време пред екран и расположение.";
 }
 
 function drawChart() {
@@ -610,7 +610,7 @@ function drawEmptyChart(ctx, width, height) {
   ctx.fillStyle = "#66747b";
   ctx.font = "800 16px system-ui, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText("Додај внес или вчитај демо податоци", width / 2, height / 2);
+  ctx.fillText("Додај дневен запис за да се појави графикон", width / 2, height / 2);
 }
 
 function drawLine(ctx, points, color, lineWidth) {
@@ -663,7 +663,7 @@ function renderCorrelation() {
     items.filter((log) => log.screenTime > 4).length >= 2 &&
     items.filter((log) => log.screenTime <= 4).length >= 2;
   const sourceLogs = hasSleepContrast(chartLogs) || hasScreenContrast(chartLogs) ? chartLogs : allLogs;
-  const sourceLabel = sourceLogs === chartLogs ? `последните ${currentRange} дена` : "сите внесови";
+  const sourceLabel = sourceLogs === chartLogs ? `последните ${currentRange} дена` : "сите записи";
   const lowSleep = sourceLogs.filter((log) => log.sleepHours < 7);
   const healthySleep = sourceLogs.filter((log) => isHealthySleep(log.sleepHours));
   const highScreen = sourceLogs.filter((log) => log.screenTime > 4);
@@ -672,7 +672,7 @@ function renderCorrelation() {
   if (lowSleep.length >= 2 && healthySleep.length >= 2) {
     const lowMood = average(lowSleep.map((log) => log.mood));
     const healthyMood = average(healthySleep.map((log) => log.mood));
-    els.correlationTitle.textContent = lowMood < healthyMood ? "Повеќе сон, подобро расположение" : "Твојот ритам е мешан";
+    els.correlationTitle.textContent = lowMood < healthyMood ? "Повеќе сон, подобро расположение" : "Твојот ритам е различен";
     els.correlationCopy.textContent = `Во ${sourceLabel}, кога спиеш под 7ч, расположението е ${lowMood.toFixed(1)}/5. Со 7-9ч сон е ${healthyMood.toFixed(1)}/5.`;
     return;
   }
@@ -680,13 +680,13 @@ function renderCorrelation() {
   if (highScreen.length >= 2 && lowerScreen.length >= 2) {
     const highMood = average(highScreen.map((log) => log.mood));
     const lowerMood = average(lowerScreen.map((log) => log.mood));
-    els.correlationTitle.textContent = lowerMood >= highMood ? "Помалку екран, полесен ден" : "Потребни се уште внесови";
-    els.correlationCopy.textContent = `Во ${sourceLabel}, со над 4ч screen time расположението е ${highMood.toFixed(1)}/5. Со 4ч или помалку е ${lowerMood.toFixed(1)}/5.`;
+    els.correlationTitle.textContent = lowerMood >= highMood ? "Помалку време пред екран, полесен ден" : "Се потребни уште записи";
+    els.correlationCopy.textContent = `Во ${sourceLabel}, со повеќе од 4ч пред екран расположението е ${highMood.toFixed(1)}/5. Со 4ч или помалку е ${lowerMood.toFixed(1)}/5.`;
     return;
   }
 
   els.correlationTitle.textContent = "Нема доволно податоци";
-  els.correlationCopy.textContent = "Додај барем неколку денови со различен сон или screen time за да се појави личен увид.";
+  els.correlationCopy.textContent = "Додај барем неколку денови со различен сон или време пред екран за да се појави личен увид.";
 }
 
 function renderBadges(state) {
@@ -718,14 +718,14 @@ function renderTips() {
     tips.push({
       icon: "◐",
       title: "Почни со еден ден",
-      text: "Внеси сон, screen time и расположение денес. Утре Daylight веќе ќе има со што да спореди."
+      text: "Внеси часови сон, време пред екран и расположение денес. Утре Daylight веќе ќе има со што да спореди."
     });
   } else {
     if (latest.sleepHours < 7) {
       tips.push({
         icon: "☾",
         title: "30 минути тивок режим",
-        text: "Пробај телефонот да биде настрана половина час пред спиење и задржи исто време за легнување."
+        text: "Пробај телефонот да биде настрана 30 минути пред спиење и задржи слично време за легнување."
       });
     }
 
@@ -733,15 +733,15 @@ function renderTips() {
       tips.push({
         icon: "⌁",
         title: "Една мала пауза",
-        text: "Постави пауза од 10 минути после подолг scroll, игра или видео. Мал прекин прави разлика."
+        text: "Направи пауза од 10 минути по подолго листање, играње или гледање видеа. Кратка пауза може да направи разлика."
       });
     }
 
     if (latest.mood <= 2) {
       tips.push({
         icon: "♡",
-        title: "Провери го телото",
-        text: "Вода, кратко движење или разговор со некој близок може да го смени тонот на денот."
+        title: "Провери како си",
+        text: "Вода, кратко движење или разговор со некој близок може да ти го олесни денот."
       });
     }
 
@@ -749,7 +749,7 @@ function renderTips() {
       tips.push({
         icon: "☼",
         title: "Задржи го истиот ритам",
-        text: "Овој ден е добар шаблон: доволно сон и разумен екран. Повтори го утре со мала варијација."
+        text: "Овој ден е добар образец: доволно сон и умерено време пред екран. Обиди се да го повториш и утре."
       });
     }
   }
@@ -757,8 +757,8 @@ function renderTips() {
   if (goals.includes("screen")) {
     tips.push({
       icon: "↓",
-      title: "Намали без драма",
-      text: "Одбери една апликација и скрати ја за 15 минути денес, наместо да менуваш се одеднаш."
+      title: "Намали постепено",
+      text: "Одбери една апликација и намали го користењето за 15 минути денес, наместо да менуваш се одеднаш."
     });
   }
 
@@ -766,7 +766,7 @@ function renderTips() {
     tips.push({
       icon: "✦",
       title: "Планирај едно добро нешто",
-      text: "Стави мал настан што го сакаш пред екранот: музика, прошетка, цртање или разговор."
+      text: "Планирај мала активност пред времето на телефон: музика, прошетка, цртање или разговор."
     });
   }
 
@@ -840,9 +840,9 @@ function calculateDayScore(log) {
 }
 
 function getScoreCopy(score) {
-  if (score >= 82) return "Силен баланс: сон, екран и расположение се во добар ритам.";
-  if (score >= 62) return "Добра основа. Еден мал чекор може да го крене утрешниот скор.";
-  return "Нежен ден за поправка: почни со сон или кратка screen пауза.";
+  if (score >= 82) return "Силен баланс: сон, време пред екран и расположение се во добар ритам.";
+  if (score >= 62) return "Добра основа. Еден мал чекор може да го подобри утрешниот резултат.";
+  return "Ден за мала промена: почни со сон или кратка дигитална пауза.";
 }
 
 function getCurrentSleepStreak(items) {
