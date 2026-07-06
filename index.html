@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="mk">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Daylight</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#home" aria-label="Daylight почетна">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>
+            <strong>Daylight</strong>
+            <small>сон и екрани</small>
+          </span>
+        </a>
+
+        <nav class="tab-nav" aria-label="Главна навигација">
+          <button class="tab-button active" type="button" data-tab="home" aria-label="Дневник" title="Дневник">
+            <span aria-hidden="true">◐</span>
+            <span>Дневник</span>
+          </button>
+          <button class="tab-button" type="button" data-tab="stats" aria-label="Статистика" title="Статистика">
+            <span aria-hidden="true">▥</span>
+            <span>Статистика</span>
+          </button>
+          <button class="tab-button" type="button" data-tab="badges" aria-label="Достигнувања" title="Достигнувања">
+            <span aria-hidden="true">✦</span>
+            <span>Badges</span>
+          </button>
+          <button class="tab-button" type="button" data-tab="tips" aria-label="Совети" title="Совети">
+            <span aria-hidden="true">☼</span>
+            <span>Совети</span>
+          </button>
+        </nav>
+      </header>
+
+      <main>
+        <section class="panel active" id="home" aria-labelledby="home-title">
+          <div class="home-grid">
+            <article class="hero-panel">
+              <div class="sky-visual" aria-hidden="true">
+                <div class="sun"></div>
+                <span class="cloud cloud-one"></span>
+                <span class="cloud cloud-two"></span>
+                <span class="horizon"></span>
+              </div>
+              <div class="hero-copy">
+                <p class="eyebrow">денешен баланс</p>
+                <h1 id="home-title">Колку светлина имаш за утре?</h1>
+                <p id="daily-summary">Внеси го денешниот сон, екран и расположение.</p>
+              </div>
+            </article>
+
+            <form class="log-card" id="log-form">
+              <div class="form-head">
+                <div>
+                  <p class="eyebrow">10 секунди</p>
+                  <h2>Дневен внес</h2>
+                </div>
+                <input id="entry-date" name="date" type="date" required aria-label="Датум">
+              </div>
+
+              <div class="time-row">
+                <label>
+                  <span>Легнав</span>
+                  <input id="bed-time" name="bedTime" type="time" value="22:45" required>
+                </label>
+                <label>
+                  <span>Станав</span>
+                  <input id="wake-time" name="wakeTime" type="time" value="07:00" required>
+                </label>
+              </div>
+
+              <label class="range-field">
+                <span>Screen time</span>
+                <span class="range-value"><output id="screen-output">4.0</output>ч</span>
+                <input id="screen-time" name="screenTime" type="range" min="0" max="12" step="0.5" value="4">
+              </label>
+
+              <fieldset class="mood-field">
+                <legend>Расположение</legend>
+                <div class="mood-options" id="mood-options">
+                  <label><input type="radio" name="mood" value="1"><span>😣</span></label>
+                  <label><input type="radio" name="mood" value="2"><span>🙁</span></label>
+                  <label><input type="radio" name="mood" value="3" checked><span>😐</span></label>
+                  <label><input type="radio" name="mood" value="4"><span>🙂</span></label>
+                  <label><input type="radio" name="mood" value="5"><span>😄</span></label>
+                </div>
+              </fieldset>
+
+              <div class="form-actions">
+                <button class="primary-button" type="submit">Зачувај ден</button>
+                <button class="ghost-button" id="demo-data" type="button">Демо податоци</button>
+              </div>
+            </form>
+          </div>
+
+          <section class="metric-strip" aria-label="Краток преглед">
+            <article>
+              <span>Streak</span>
+              <strong id="streak-count">0</strong>
+              <small>здрави денови</small>
+            </article>
+            <article>
+              <span>Поени</span>
+              <strong id="points-count">0</strong>
+              <small>Daylight XP</small>
+            </article>
+            <article>
+              <span>Просек сон</span>
+              <strong id="avg-sleep">0ч</strong>
+              <small>последни 7 дена</small>
+            </article>
+            <article>
+              <span>Просек екран</span>
+              <strong id="avg-screen">0ч</strong>
+              <small>последни 7 дена</small>
+            </article>
+          </section>
+        </section>
+
+        <section class="panel" id="stats" aria-labelledby="stats-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">трендови</p>
+              <h2 id="stats-title">Сон, екран и расположение</h2>
+            </div>
+            <div class="segmented" role="group" aria-label="Опсег">
+              <button class="range-button active" type="button" data-range="7">7 дена</button>
+              <button class="range-button" type="button" data-range="30">30 дена</button>
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <canvas id="trend-chart" width="1100" height="430" aria-label="Графикон со сон и screen time" role="img"></canvas>
+            <div class="legend" aria-hidden="true">
+              <span><i class="sleep-key"></i> сон</span>
+              <span><i class="screen-key"></i> screen time</span>
+              <span><i class="mood-key"></i> расположение</span>
+            </div>
+          </div>
+
+          <div class="insight-grid">
+            <article class="insight-card">
+              <p class="eyebrow">твој шаблон</p>
+              <h3 id="correlation-title">Нема доволно податоци</h3>
+              <p id="correlation-copy">Додај неколку дневни внесови за Daylight да спореди сон, екрани и расположение.</p>
+            </article>
+            <article class="insight-card">
+              <p class="eyebrow">денес</p>
+              <h3 id="today-score">0/100</h3>
+              <p id="today-score-copy">Скорот се гради од сон, screen time и расположение.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel" id="badges" aria-labelledby="badges-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">игровен ритам</p>
+              <h2 id="badges-title">Достигнувања</h2>
+            </div>
+            <button class="ghost-button" id="reset-data" type="button">Исчисти</button>
+          </div>
+
+          <div class="progress-card">
+            <div>
+              <span>Следна цел</span>
+              <strong id="next-goal">7 дена добар сон</strong>
+            </div>
+            <div class="progress-track" aria-hidden="true">
+              <span id="goal-progress"></span>
+            </div>
+          </div>
+
+          <div class="badge-grid" id="badge-grid"></div>
+        </section>
+
+        <section class="panel" id="tips" aria-labelledby="tips-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">микро совети</p>
+              <h2 id="tips-title">Следен мал чекор</h2>
+            </div>
+          </div>
+
+          <div class="tips-layout">
+            <div class="tips-list" id="tips-list"></div>
+            <aside class="hbsc-card">
+              <p class="eyebrow">HBSC факт</p>
+              <h3 id="hbsc-fact-title">Teens, screens and mental health</h3>
+              <p id="hbsc-fact">WHO/HBSC во 2022 опфатиле речиси 280.000 млади на 11, 13 и 15 години од 44 земји и региони. Извештајот бележи раст на проблематична употреба на социјални медиуми од 7% во 2018 на 11% во 2022.</p>
+              <a href="https://www.who.int/europe/news/item/25-09-2024-teens--screens-and-mental-health" target="_blank" rel="noreferrer">WHO/HBSC извор</a>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <dialog id="onboarding">
+      <form method="dialog" class="onboarding-card" id="onboarding-form">
+        <span class="brand-mark large" aria-hidden="true"></span>
+        <p class="eyebrow">добредојде</p>
+        <h2>Постави го твојот Daylight</h2>
+
+        <label>
+          <span>Возраст</span>
+          <select id="profile-age" required>
+            <option value="11">11</option>
+            <option value="12">12</option>
+            <option value="13" selected>13</option>
+            <option value="14">14</option>
+            <option value="15">15</option>
+            <option value="16">16+</option>
+          </select>
+        </label>
+
+        <fieldset>
+          <legend>Главна цел</legend>
+          <div class="goal-options">
+            <label><input type="radio" name="goal" value="sleep" checked><span>Подобар сон</span></label>
+            <label><input type="radio" name="goal" value="screen"><span>Помалку екран</span></label>
+            <label><input type="radio" name="goal" value="mood"><span>Подобро расположение</span></label>
+          </div>
+        </fieldset>
+
+        <label>
+          <span>Идеално време за спиење</span>
+          <input id="profile-bedtime" type="time" value="22:30" required>
+        </label>
+
+        <button class="primary-button" type="submit">Започни</button>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
